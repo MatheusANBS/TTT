@@ -17,14 +17,14 @@
         TransparencyLevelHint="Mica"
         Background="#0F1418">
 
-    <Grid>
+    <Grid Margin="{Binding $parent[Window].OffScreenMargin}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Panel Grid.Row="0" Height="30" IsHitTestVisible="False">
+        <Panel Grid.Row="0" Height="32" IsHitTestVisible="False">
             <TextBlock Text="TTT" Margin="15,0,0,0" VerticalAlignment="Center" FontSize="12" Opacity="0.8"/>
         </Panel>
 
