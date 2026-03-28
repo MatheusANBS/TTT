@@ -8,3 +8,6 @@ frontend/renderer/node_modules/
 TTT/bin/
 TTT/obj/
 installer_output/
+
+# Ignore Web project
+landing-page/
