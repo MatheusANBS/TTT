@@ -1,0 +1,268 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TTT.ViewModels"
+             xmlns:models="using:TTT.Models"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="TTT.Views.ScannerView"
+             x:DataType="vm:ScannerViewModel"
+             mc:Ignorable="d"
+             d:DesignWidth="1200"
+             d:DesignHeight="760">
+
+    <Grid Margin="0">
+        <Grid.ColumnDefinitions>
+            <!-- Left control panel -->
+            <ColumnDefinition Width="320" MinWidth="220"/>
+            <ColumnDefinition Width="6"/>
+            <ColumnDefinition Width="*" MinWidth="300"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0"
+                Margin="12,12,4,12"
+                Padding="16"
+                VerticalAlignment="Stretch"
+                Background="#1E252B"
+                BorderBrush="#2F3942"
+                BorderThickness="1"
+            ClipToBounds="True"
+                CornerRadius="8">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Text="Configurações de Scan"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,12"/>
+
+                    <!-- Value type -->
+                    <TextBlock Text="Tipo de valor" Margin="0,0,0,4" Opacity="0.85" />
+                    <ComboBox ItemsSource="{x:Static models:ScanValueTypeItems.All}"
+                              SelectedItem="{Binding ValueType}"
+                              Margin="0,0,0,12"/>
+
+                    <!-- Scan type -->
+                    <TextBlock Text="Tipo de scan" Margin="0,0,0,4" Opacity="0.85" />
+                    <ComboBox ItemsSource="{x:Static models:ScanTypeItems.All}"
+                              SelectedItem="{Binding ScanType}"
+                              Margin="0,0,0,12"/>
+
+                    <!-- Value input (only for ExactValue) -->
+                    <TextBox Watermark="Valor"
+                             Text="{Binding ValueText}"
+                             Margin="0,0,0,16"/>
+
+                    <!-- Action buttons -->
+                        <Button Command="{Binding FirstScanCommand}"
+                            Content="PRIMEIRO SCAN"
+                            HorizontalAlignment="Stretch"
+                            Margin="0,0,0,6"
+                                ToolTip.Tip="Ctrl+F"/>
+
+                        <Button Command="{Binding NextScanCommand}"
+                            Content="PRÓXIMO SCAN"
+                            HorizontalAlignment="Stretch"
+                            Margin="0,0,0,6"
+                                ToolTip.Tip="Ctrl+N"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
+                                Command="{Binding ResetScanCommand}"
+                                Content="RESETAR"/>
+                        <Button Grid.Column="2"
+                                Foreground="#F44336"
+                                Command="{Binding CancelScanCommand}"
+                                Content="CANCELAR"
+                            ToolTip.Tip="Esc"/>
+                    </Grid>
+
+                    <!-- Progress -->
+                    <ProgressBar Value="{Binding ProgressPercent}"
+                                 Maximum="100"
+                                 IsVisible="{Binding IsScanning}"
+                                 Height="6"
+                                 Margin="0,0,0,4"/>
+
+                    <TextBlock Text="{Binding StatusText}"
+                               FontSize="12"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,4"/>
+
+                    <TextBlock Text="{Binding EtaText}"
+                               FontSize="12"
+                               Foreground="#3A71E0"
+                               Margin="0,0,0,8"/>
+
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Splitter -->
+        <GridSplitter Grid.Column="1"
+                      Width="6"
+                      HorizontalAlignment="Stretch"
+                      Background="Transparent"/>
+
+        <!-- ══ RIGHT: Results + mini address list ═════════════════════════ -->
+        <Grid Grid.Column="2" Margin="4,12,12,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*" MinHeight="100"/>
+                <RowDefinition Height="14"/>
+                <RowDefinition Height="2*" MinHeight="80"/>
+            </Grid.RowDefinitions>
+
+            <!-- Scan results -->
+            <Border Grid.Row="0"
+                    Padding="0"
+                    Background="#1E252B"
+                    BorderBrush="#2F3942"
+                    BorderThickness="1"
+                    ClipToBounds="True"
+                    CornerRadius="8">
+                <Grid RowDefinitions="Auto,*,Auto,Auto">
+                    <Border Grid.Row="0"
+                            Background="#2A3F5B"
+                            Padding="12,6">
+                        <DockPanel>
+                        <DockPanel LastChildFill="True">
+                            <TextBox DockPanel.Dock="Right"
+                                     Width="220"
+                                     Margin="8,0,0,0"
+                                     Watermark="Pesquisar valor"
+                                     Text="{Binding ResultValueFilter}"/>
+                            <TextBlock Text="Resultados do Scan"
+                                       FontWeight="Medium"
+                                       Foreground="White"
+                                       VerticalAlignment="Center"/>
+                        </DockPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <DataGrid Grid.Row="1"
+                              Name="ResultsGrid"
+                              ItemsSource="{Binding ScanResults}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Extended"
+                              GridLinesVisibility="All"
+                              DoubleTapped="ResultsGrid_OnDoubleTapped">
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Endereço"
+                                               Binding="{Binding Address, StringFormat=0x{0:X8}}"
+                                               Width="1.4*"
+                                               MinWidth="130" />
+
+                            <DataGridTextColumn Header="Valor"
+                                               Binding="{Binding DisplayValue}"
+                                               Width="*"
+                                               MinWidth="120" />
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                        <Border Grid.Row="2"
+                            Padding="10,8"
+                            Background="#1F2B35">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Adicionar selecionados"
+                                Click="AddSelectedResultsButton_OnClick"
+                                ToolTip.Tip="Adiciona todas as linhas selecionadas" />
+                            <TextBlock Text="Use Ctrl/Shift para multi-selecao"
+                                   VerticalAlignment="Center"
+                                   Opacity="0.8" />
+                        </StackPanel>
+                        </Border>
+
+                        <Border Grid.Row="3"
+                            Padding="12,8"
+                            Background="#22303A">
+                        <WrapPanel>
+                            <TextBlock Text="{Binding PageInfoText}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,10,0"/>
+                            <TextBlock Text="Itens/página"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,6,0"/>
+                                <ComboBox Width="80"
+                                ItemsSource="{Binding PageSizeOptions}"
+                                SelectedItem="{Binding PageSize}"
+                                VerticalAlignment="Center"
+                                Margin="0,0,10,0" />
+                            <Button Command="{Binding FirstPageCommand}"
+                                Content="Primeira"
+                                Margin="0,0,4,0"
+                                MinWidth="70"/>
+                            <Button Command="{Binding PreviousPageCommand}"
+                                Content="Anterior"
+                                Margin="0,0,4,0"
+                                MinWidth="70"/>
+                            <Button Command="{Binding NextPageCommand}"
+                                Content="Próxima"
+                                Margin="0,0,4,0"
+                                MinWidth="70"/>
+                            <Button Command="{Binding LastPageCommand}"
+                                Content="Última"
+                                MinWidth="70"/>
+                        </WrapPanel>
+                        </Border>
+                </Grid>
+            </Border>
+
+            <!-- Splitter -->
+            <GridSplitter Grid.Row="1"
+                          Height="6"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Stretch"
+                          Background="Transparent"/>
+
+            <!-- Mini address list preview -->
+            <Border Grid.Row="2"
+                    Padding="0"
+                    Background="#1E252B"
+                    BorderBrush="#2F3942"
+                    BorderThickness="1"
+                    ClipToBounds="True"
+                    CornerRadius="8">
+                <Grid RowDefinitions="Auto,*">
+                    <Border Grid.Row="0"
+                            Background="#22303A"
+                            Padding="12,6">
+                        <DockPanel>
+                        <Button DockPanel.Dock="Right"
+                                Command="{Binding GoToAddressListCommand}"
+                                Padding="4,0"
+                                FontSize="11">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Ver completo"/>
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Text="Lista de Endereços"
+                                   FontWeight="Medium"
+                                   VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Border>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding AddressListPreview}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              GridLinesVisibility="All">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Descrição"   Binding="{Binding Description}" Width="*"/>
+                            <DataGridTextColumn Header="Endereço"
+                                               Binding="{Binding Address, StringFormat=0x{0:X8}}"
+                                               Width="1.3*"
+                                               MinWidth="130" />
+                            <DataGridTextColumn Header="Valor" Binding="{Binding CurrentValue}" Width="*" MinWidth="100" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,85 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TTT.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:TTT.Views"
+        xmlns:conv="using:TTT.Converters"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        x:Class="TTT.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="TTT"
+        Width="1200" Height="800"
+        MinWidth="900" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="PreferSystemChrome"
+        TransparencyLevelHint="Mica"
+        Background="#0F1418">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Panel Grid.Row="0" Height="30" IsHitTestVisible="False">
+            <TextBlock Text="TTT" Margin="15,0,0,0" VerticalAlignment="Center" FontSize="12" Opacity="0.8"/>
+        </Panel>
+
+        <Grid Grid.Row="1" Margin="14,10,14,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Margin="0,0,0,12" Padding="14,10"
+                    Background="#1E252B"
+                    BorderBrush="#2F3942"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <WrapPanel Grid.Row="0" Orientation="Horizontal">
+                        <Button Content="Processos" Command="{Binding NavigateToProcessCommand}" Margin="0,0,8,0" />
+                        <Button Content="Scanner" Command="{Binding NavigateToScannerCommand}" Margin="0,0,8,0" />
+                        <Button Content="Enderecos" Command="{Binding NavigateToAddressListCommand}" Margin="0,0,8,0" />
+                        <Button Content="Pointer Mapper" Command="{Binding NavigateToPointerMapperCommand}" Margin="0,0,8,0" />
+                        <Button Content="Logs" Command="{Binding NavigateToLogCommand}" />
+                    </WrapPanel>
+
+                    <DockPanel Grid.Row="1" Margin="0,12,0,0">
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center" HorizontalAlignment="Right">
+                            <Button Content="Salvar" Click="SaveProfileButton_OnClick" Margin="0,0,8,0" />
+                            <Button Content="Carregar" Click="LoadProfileButton_OnClick" Margin="0,0,8,0" />
+                            <Button Content="Atalhos" Command="{Binding ShowHotkeysTutorialCommand}" Margin="0,0,8,0" />
+                            <Button Content="Desconectar" Command="{Binding DisconnectProcessCommand}" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
+                            <Ellipse Width="10" Height="10" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Lime" />
+                            <TextBlock Text="{Binding AttachedLabel}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </DockPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1"
+                    Background="#182127"
+                    CornerRadius="12"
+                    BorderThickness="1"
+                    BorderBrush="#2C3942">
+                <TransitioningContentControl Content="{Binding CurrentView}" Margin="0" />
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Background="#1E252B" Padding="8,4" BorderThickness="0,1,0,0" BorderBrush="#2C3942">
+            <TextBlock Text="Ready" FontSize="12" Opacity="0.85" />
+        </Border>
+    </Grid>
+</Window>

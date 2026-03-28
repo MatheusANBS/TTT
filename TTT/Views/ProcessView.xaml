@@ -1,0 +1,219 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TTT.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Name="ProcessRoot"
+             x:Class="TTT.Views.ProcessView"
+             x:DataType="vm:ProcessViewModel"
+             mc:Ignorable="d"
+             d:DesignWidth="1000"
+             d:DesignHeight="650">
+
+    <UserControl.Styles>
+        <Style Selector="Button.process-card">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="ClipToBounds" Value="True" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+        </Style>
+
+        <Style Selector="Button.process-card /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+
+        <Style Selector="Button.process-card:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+
+        <Style Selector="Button.process-card:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+
+        <Style Selector="Button.process-card:focus /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Margin="14" RowDefinitions="Auto,*">
+        <Border Grid.Row="0"
+                Background="#1E252B"
+                BorderBrush="#2F3942"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="14,10"
+                Margin="0,0,0,12">
+            <Grid ColumnDefinitions="*,Auto"
+                  RowDefinitions="Auto,Auto">
+                <Border Grid.Row="0"
+                        Grid.Column="0"
+                        Padding="10,6"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        BorderBrush="#3C4B55"
+                        Margin="0,0,12,10">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Ellipse Width="10" Height="10" Fill="#4CAF50" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding ConnectedProcessLabel}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Row="0"
+                            Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="12"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,0,10">
+                    <CheckBox Content="Apenas com janela"
+                              IsChecked="{Binding ShowOnlyWithWindows}"
+                              VerticalAlignment="Center" />
+                    <Button Content="Atualizar"
+                            Command="{Binding RefreshProcessesCommand}"
+                            IsEnabled="{Binding IsNotRefreshing}"
+                            Padding="12,4" />
+                </StackPanel>
+
+                <TextBox Grid.Row="1"
+                         Grid.ColumnSpan="2"
+                         Watermark="Pesquisar processos (PID, Nome)..."
+                         Text="{Binding FilterText}" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" RowDefinitions="Auto,*">
+            <TextBlock Text="{Binding ProcessCountLabel}"
+                       Foreground="#A9BBC7"
+                       Margin="2,0,0,10" />
+
+            <Border Grid.Row="1"
+                    Background="#182127"
+                    BorderBrush="#2C3942"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Padding="14">
+                <Grid>
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto"
+                                  IsVisible="{Binding HasProcesses}">
+                        <ItemsControl ItemsSource="{Binding Processes}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ProcessInfo">
+                                    <Button Classes="process-card"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Padding="0"
+                                            Margin="0,0,12,12"
+                                            Command="{Binding #ProcessRoot.DataContext.ToggleProcessCardCommand}"
+                                            CommandParameter="{Binding .}">
+                                        <Border Width="280"
+                                                Height="132"
+                                                Padding="14"
+                                                Background="{Binding CardBackground}"
+                                                BorderBrush="{Binding CardBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="12">
+                                            <Grid RowDefinitions="Auto,Auto,*"
+                                                  ColumnDefinitions="Auto,*,Auto">
+                                                <Border Grid.RowSpan="2"
+                                                        Width="44"
+                                                        Height="44"
+                                                        CornerRadius="10"
+                                                        Background="#2B3942"
+                                                        VerticalAlignment="Top">
+                                                    <Grid>
+                                                        <Image Source="{Binding Icon}"
+                                                               Width="22"
+                                                               Height="22"
+                                                               Stretch="Uniform"
+                                                               IsVisible="{Binding HasIcon}" />
+                                                        <TextBlock Text="{Binding Initial}"
+                                                                   FontSize="18"
+                                                                   FontWeight="SemiBold"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   IsVisible="{Binding HasNoIcon}" />
+                                                    </Grid>
+                                                </Border>
+
+                                                <StackPanel Grid.Column="1"
+                                                            Margin="12,0,0,0"
+                                                            Spacing="2">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontSize="15"
+                                                               FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding Pid, StringFormat='PID {0}'}"
+                                                               Foreground="#A9BBC7" />
+                                                </StackPanel>
+
+                                                <Border Grid.Column="2"
+                                                        Width="34"
+                                                        Height="34"
+                                                        Background="#305F47"
+                                                        ToolTip.Tip="Conectado"
+                                                        CornerRadius="999"
+                                                        IsVisible="{Binding IsConnected}">
+                                                    <PathIcon Width="14"
+                                                              Height="14"
+                                                              HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"
+                                                              Foreground="White"
+                                                              Data="M 7.5 15.8 L 2.6 10.9 L 3.8 9.7 L 7.5 13.4 L 16.8 4.1 L 18 5.3 Z" />
+                                                </Border>
+
+                                                <TextBlock Grid.Row="2"
+                                                           Grid.Column="1"
+                                                           Grid.ColumnSpan="2"
+                                                           Margin="12,10,0,0"
+                                                           Text="{Binding TitleOrFallback}"
+                                                           Foreground="#D6E1E8"
+                                                           TextWrapping="Wrap"
+                                                           MaxLines="2"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Border>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <StackPanel IsVisible="{Binding HasNoProcesses}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="8">
+                        <TextBlock Text="Nenhum processo encontrado"
+                                   HorizontalAlignment="Center"
+                                   FontSize="16"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="Ajuste o filtro ou atualize a lista de processos."
+                                   HorizontalAlignment="Center"
+                                   Foreground="#A9BBC7" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

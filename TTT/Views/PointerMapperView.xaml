@@ -1,0 +1,134 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TTT.ViewModels"
+             xmlns:models="using:TTT.Models"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="TTT.Views.PointerMapperView"
+             x:DataType="vm:PointerMapperViewModel"
+             mc:Ignorable="d"
+             d:DesignWidth="1200"
+             d:DesignHeight="760">
+
+    <Grid Margin="14" RowDefinitions="Auto,Auto,*">
+        <Border Grid.Row="0"
+                Padding="16"
+                Margin="0,0,0,12"
+                Background="#1E252B"
+                BorderBrush="#2F3942"
+                BorderThickness="1"
+            ClipToBounds="True"
+                CornerRadius="8">
+            <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="*,12,120,12,140,12,Auto">
+                    <TextBox Grid.Column="0"
+                             Watermark="Endereco alvo (hex)"
+                             Text="{Binding TargetAddress}"
+                             FontFamily="Consolas" />
+
+                    <TextBox Grid.Column="2"
+                             Watermark="Offset max"
+                             ToolTip.Tip="Aceita decimal (4096) ou hex (0x3000)."
+                             Text="{Binding MaxOffset}" />
+
+                    <TextBox Grid.Column="4"
+                             Watermark="Profundidade max"
+                             Text="{Binding MaxDepth}" />
+
+                    <Button Grid.Column="6"
+                            Content="BUSCAR"
+                            Command="{Binding SearchCommand}" />
+                </Grid>
+
+                <WrapPanel Orientation="Horizontal" ItemHeight="36">
+                    <CheckBox Content="Modulos estaticos"
+                              IsChecked="{Binding PrioritizeStatic}"
+                              Margin="0,0,20,0" />
+
+                    <CheckBox Content="Offsets negativos"
+                              IsChecked="{Binding AllowNegativeOffsets}"
+                              Margin="0,0,20,0" />
+
+                    <ComboBox Width="140"
+                              Margin="0,0,20,0"
+                              ItemsSource="{x:Static models:ScanValueTypeItems.All}"
+                              SelectedItem="{Binding ValueType}" />
+
+                    <Button Content="VERIFICAR TUDO" Command="{Binding VerifyAllCommand}" Margin="0,0,8,0" />
+                    <Button Content="CANCELAR" Command="{Binding CancelSearchCommand}" Margin="0,0,8,0" />
+                    <Button Content="SALVAR SCAN" Click="SaveScanButton_OnClick" Margin="0,0,8,0" />
+                    <Button Content="CARREGAR" Click="LoadScanButton_OnClick" Margin="0,0,8,0" />
+                    <Button Content="COMPARAR" Click="CompareButton_OnClick" />
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="1" Margin="0,0,0,12" Spacing="4">
+            <ProgressBar IsIndeterminate="{Binding IsSearching}" Height="4" IsVisible="{Binding IsSearching}" />
+            <Grid ColumnDefinitions="*,12,200,8,130">
+                <TextBlock Grid.Column="0"
+                           Text="{Binding ProgressText}"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" />
+
+                <TextBox Grid.Column="2"
+                         Watermark="Valor atual"
+                         Text="{Binding CurrentValueFilter}"
+                         FontFamily="Consolas" />
+
+                <ComboBox Grid.Column="4"
+                          ItemsSource="{x:Static vm:PointerMapperViewModel.StabilityFilterOptions}"
+                          SelectedItem="{Binding StabilityFilter}" />
+            </Grid>
+        </StackPanel>
+
+        <Border Grid.Row="2"
+                Background="#1E252B"
+                BorderBrush="#2F3942"
+                BorderThickness="1"
+                ClipToBounds="True"
+                CornerRadius="8">
+            <Grid RowDefinitions="Auto,*">
+                <Border Grid.Row="0"
+                        Padding="12,8"
+                        Background="#22303A">
+                    <WrapPanel ItemHeight="36">
+                        <TextBlock Text="{Binding VisibleResultCount, StringFormat=Filtrados: {0:N0}}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,12,0" />
+                        <TextBlock Text="{Binding PageInfoText}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                        <TextBlock Text="Itens/pagina" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <ComboBox Width="80"
+                                  ItemsSource="{Binding PageSizeOptions}"
+                                  SelectedItem="{Binding PageSize}"
+                                  Margin="0,0,10,0" />
+                        <Button Content="Primeira" Command="{Binding FirstPageCommand}" Margin="0,0,4,0" />
+                        <Button Content="Anterior" Command="{Binding PreviousPageCommand}" Margin="0,0,4,0" />
+                        <Button Content="Proxima" Command="{Binding NextPageCommand}" Margin="0,0,4,0" />
+                        <Button Content="Ultima" Command="{Binding LastPageCommand}" Margin="0,0,12,0" />
+                        <Button Content="Adicionar selecionados" Click="AddSelectedPointersButton_OnClick" />
+                        </WrapPanel>
+                    </Border>
+
+                                <DataGrid Grid.Row="1"
+                                                    x:Name="PointerResultsGrid"
+                          ItemsSource="{Binding ResultsView}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          SelectionMode="Extended"
+                          GridLinesVisibility="All"
+                          DoubleTapped="PointerResultsGrid_OnDoubleTapped">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="OK" Binding="{Binding IsVerified}" Width="70" />
+                        <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="80" />
+                        <DataGridTextColumn Header="Estabilidade" Binding="{Binding StabilityLabel}" Width="130" />
+                        <DataGridTextColumn Header="Descricao" Binding="{Binding Description}" Width="2*" MinWidth="200" />
+                        <DataGridTextColumn Header="Modulo" Binding="{Binding ModuleName}" Width="1.2*" MinWidth="120" />
+                        <DataGridTextColumn Header="End. Resolvido" Binding="{Binding ResolvedAddress, StringFormat=0x{0:X}}" Width="1.3*" MinWidth="140" />
+                        <DataGridTextColumn Header="Valor Atual" Binding="{Binding CurrentValue}" Width="*" MinWidth="110" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

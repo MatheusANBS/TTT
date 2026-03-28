@@ -1,0 +1,10 @@
+backend/**/bin/
+backend/**/obj/
+desktop/electron/dist/
+desktop/electron/.backend/
+desktop/electron/node_modules/
+frontend/renderer/dist/
+frontend/renderer/node_modules/
+TTT/bin/
+TTT/obj/
+installer_output/

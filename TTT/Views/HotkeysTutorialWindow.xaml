@@ -1,0 +1,61 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        x:Class="TTT.Views.HotkeysTutorialWindow"
+        mc:Ignorable="d"
+        d:DesignWidth="560"
+        d:DesignHeight="520"
+        Title="Atalhos do App"
+        Width="560"
+        Height="520"
+        MinWidth="500"
+        MinHeight="450"
+        WindowStartupLocation="CenterOwner"
+        Background="#0F1418">
+
+    <Grid Margin="16" RowDefinitions="Auto,*,Auto">
+        <Border Grid.Row="0" Padding="14" Margin="0,0,0,12" Background="#1E252B" BorderBrush="#2F3942" BorderThickness="1" CornerRadius="8">
+            <StackPanel>
+                <TextBlock Text="Tutorial de Hotkeys" FontSize="20" FontWeight="Bold"/>
+                <TextBlock Text="Use estes atalhos para navegar e executar scans mais rapido."
+                           Margin="0,4,0,0"
+                           Opacity="0.86"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Padding="12" Background="#1E252B" BorderBrush="#2F3942" BorderThickness="1" CornerRadius="8">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Ctrl+R" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,8"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Ir para Processos" Margin="0,0,0,8"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Ctrl+F" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,8"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="Primeiro Scan" Margin="0,0,0,8"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Ctrl+N" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,8"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="Proximo Scan" Margin="0,0,0,8"/>
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Ctrl+P" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,8"/>
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="Ir para Mapeador de Ponteiros" Margin="0,0,0,8"/>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Ctrl+S" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,8"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="Salvar Configuracao" Margin="0,0,0,8"/>
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Esc" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,8"/>
+                    <TextBlock Grid.Row="5" Grid.Column="1" Text="Cancelar scan em andamento" Margin="0,0,0,8"/>
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="F5" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,8"/>
+                    <TextBlock Grid.Row="6" Grid.Column="1" Text="Atualizar valores da lista de enderecos" Margin="0,0,0,8"/>
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="F1" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,0"/>
+                    <TextBlock Grid.Row="7" Grid.Column="1" Text="Abrir este tutorial de atalhos"/>
+                </Grid>
+            </ScrollViewer>
+        </Border>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button MinWidth="120" Content="Fechar" Click="Close_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

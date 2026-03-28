@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TTT.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="TTT.Views.LogView"
+             x:DataType="vm:LogViewModel"
+             mc:Ignorable="d"
+             d:DesignWidth="1100"
+             d:DesignHeight="700">
+
+    <Grid Margin="14" RowDefinitions="Auto,*">
+        <DockPanel Grid.Row="0" Margin="0,0,0,8">
+            <TextBlock Text="Log de Eventos"
+                       FontSize="20"
+                       FontWeight="SemiBold"
+                       VerticalAlignment="Center" />
+            <Button DockPanel.Dock="Right"
+                    Content="Limpar"
+                    Command="{Binding ClearLogCommand}" />
+        </DockPanel>
+
+        <Border Grid.Row="1"
+                Background="#1E252B"
+                BorderBrush="#2F3942"
+                BorderThickness="1"
+                CornerRadius="8">
+            <ListBox ItemsSource="{Binding Entries}"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Message}"
+                                   Foreground="{Binding LevelColor}"
+                                   FontFamily="Consolas"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"
+                                   Padding="10,3" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+    </Grid>
+</UserControl>
