@@ -2,6 +2,11 @@
 
 ---
 
+## [2.0.3] - 2026-03-28
+
+### Fix
+
+- **Fix**: Corrigido bug visual ao maximizar a janela.
 
 ## [2.0.2] - 2026-03-28
 

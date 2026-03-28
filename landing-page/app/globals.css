@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #0B0F1A;
+  --color-foreground: #F8FAFC;
+  --color-primary: #00F0FF;
+  --color-secondary: #FF003C;
+  --color-accent: #7C3AED;
+  --font-sans: var(--font-inter);
+  --font-orbitron: var(--font-orbitron);
+}
+
+@utility text-glow-primary {
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.7), 0 0 20px rgba(0, 240, 255, 0.4);
+}
+
+@utility text-glow-secondary {
+  text-shadow: 0 0 10px rgba(255, 0, 60, 0.7), 0 0 20px rgba(255, 0, 60, 0.4);
+}
+
+@utility box-glow-primary {
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+}
+
+@utility glass-panel {
+  background: rgba(11, 15, 26, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), sans-serif;
+  overflow-x: hidden;
+}
