@@ -1,23 +1,36 @@
 # TTT
 
-TTT é um aplicativo desktop para Windows focado em inspeção e manipulação de memória de processos locais. O projeto oferece fluxo completo para anexar a um processo, escanear valores, manter uma lista de endereços com atualização em tempo real, congelar valores e localizar cadeias de ponteiros.
+> Real-time memory scanner and editor for Windows. Attach to any process, scan and filter values, freeze addresses, map pointer chains, and save sessions.
 
-O aplicativo atual usa Avalonia UI sobre .NET 8 e roda apenas em Windows x64.
+![TTT Main UI](assets/hero-main-screenshot.png)
 
-## Principais recursos
+---
 
-- Anexar e desconectar de processos locais.
-- Filtrar e listar processos com janela.
-- Executar `First Scan` e `Next Scan` para busca por valor exato, valor desconhecido, alterado, inalterado, aumentado e diminuído.
-- Manter uma address list com leitura periódica dos valores.
-- Editar valores e congelar endereços em tempo real.
-- Organizar endereços por grupos.
-- Configurar hotkeys globais por grupo.
-- Encontrar pointer chains para um endereço alvo.
-- Salvar e carregar configuração da sessão.
-- Detectar automaticamente novas versões publicadas no GitHub Releases.
-- Exportar dados auxiliares para arquivos locais.
-- Gerar instalador Windows com Inno Setup.
+## Features
+
+|                                                                   |                                                                                                                    |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| ![Process Selector](assets/feature-process-selector.png)          | ![Scanner](assets/feature-diff-scan.png)                                                                           |
+| **Process Selector** — Filter and attach to any windowed process  | **Memory Scanner** — First Scan & Next Scan with exact, unknown, changed, unchanged, increased and decreased modes |
+| ![Address List](assets/feature-address-list.png)                  | ![Pointer Mapper](assets/feature-pointer-mapper.png)                                                               |
+| **Address List** — Live value reading, freeze, groups and hotkeys | **Pointer Mapper** — Discover pointer chains for any target address                                                |
+| ![Hotkeys](assets/feature-hotkeys-tutorial.png)                   | ![Logs](assets/showcase-app-logs.png)                                                                              |
+| **Hotkeys** — Configurable global hotkeys per address group       | **Logs** — Centralized structured log panel                                                                        |
+
+### Full feature list
+
+- Attach and detach from local processes.
+- Filter and list windowed processes.
+- `First Scan` and `Next Scan`: exact value, unknown, changed, unchanged, increased and decreased.
+- Address list with periodic live value reading.
+- Edit values and freeze addresses in real time.
+- Organize addresses into groups.
+- Configure global hotkeys per group.
+- Find pointer chains for a target address.
+- Save and load session configuration.
+- Auto-detect new versions published on GitHub Releases.
+- Export auxiliary data to local files.
+- Generate Windows installer with Inno Setup.
 
 ## Stack
 
@@ -25,57 +38,57 @@ O aplicativo atual usa Avalonia UI sobre .NET 8 e roda apenas em Windows x64.
 - Avalonia 11
 - CommunityToolkit.Mvvm
 - Windows APIs via P/Invoke (`ReadProcessMemory`, `WriteProcessMemory`, `VirtualQueryEx`, `VirtualProtectEx`)
-- Inno Setup 6 para empacotamento
+- Inno Setup 6 for packaging
 
-## Requisitos
+## Requirements
 
-- Windows 10 ou Windows 11
-- Arquitetura x64
-- SDK do .NET 8 instalado para desenvolvimento
-- PowerShell 5.1+ para o script de build do instalador
-- Inno Setup 6 instalado para gerar o setup
+- Windows 10 or Windows 11
+- x64 architecture
+- .NET 8 SDK (for development)
+- PowerShell 5.1+ (for the build script)
+- Inno Setup 6 (to generate the installer)
 
-Observações:
+> **Notes:**
+>
+> - The project is configured for `x64` only.
+> - Some operations may require elevated privileges depending on the target process.
+> - Protected processes or those with anti-cheat may fail to open a handle.
 
-- O projeto foi configurado para `x64`.
-- Algumas operações podem exigir privilégios elevados, dependendo do processo alvo.
-- Processos protegidos ou com anti-cheat podem falhar ao abrir handle.
-
-## Estrutura do projeto
+## Project Structure
 
 ```text
-TTT.Migration.sln           Solução principal
-TTT/                        Aplicação desktop
-  Services/                 Regras de negócio e acesso à memória
-  ViewModels/               Orquestração MVVM
-  Views/                    Telas Avalonia
-  Models/                   Modelos de dados
-release.ps1                 Versionamento, publicação, instalador e GitHub Release
-installer.iss               Script do Inno Setup
+TTT.Migration.sln           Main solution
+TTT/                        Desktop application
+  Services/                 Business logic and memory access
+  ViewModels/               MVVM orchestration
+  Views/                    Avalonia screens
+  Models/                   Data models
+release.ps1                 Versioning, publishing, installer and GitHub Release
+installer.iss               Inno Setup script
 ```
 
-## Componentes principais
+## Core Components
 
 ### Services
 
-- `MemoryService`: abre o processo, enumera regiões de memória e realiza leitura/escrita.
-- `ScannerService`: executa scans paralelos e refinamentos sobre resultados anteriores.
-- `PointerMapperService`: busca cadeias de ponteiros para um endereço alvo.
-- `ConfigService`: salva/carrega configurações e estado em JSON.
-- `LogService`: centraliza logs do aplicativo.
+- `MemoryService` — opens the process, enumerates memory regions, reads/writes memory.
+- `ScannerService` — runs parallel scans and refines results from previous scans.
+- `PointerMapperService` — searches for pointer chains to a target address.
+- `ConfigService` — saves/loads configuration and session state as JSON.
+- `LogService` — centralizes application logs.
 
 ### ViewModels
 
-- `MainViewModel`: navegação, ciclo de vida e persistência da configuração.
-- `ProcessViewModel`: seleção e conexão com processos.
-- `ScannerViewModel`: scanner de memória e paginação de resultados.
-- `AddressListViewModel`: lista de endereços, freeze, grupos e hotkeys.
-- `PointerMapperViewModel`: busca, filtragem e validação de ponteiros.
-- `LogViewModel`: exibição de logs na interface.
+- `MainViewModel` — navigation, lifecycle and configuration persistence.
+- `ProcessViewModel` — process selection and attachment.
+- `ScannerViewModel` — memory scanner and result pagination.
+- `AddressListViewModel` — address list, freeze, groups and hotkeys.
+- `PointerMapperViewModel` — pointer search, filtering and validation.
+- `LogViewModel` — log display in the UI.
 
-## Como executar em desenvolvimento
+## Running in Development
 
-Na raiz do repositório:
+From the repository root:
 
 ```powershell
 dotnet restore .\TTT\TTT.csproj
@@ -83,117 +96,93 @@ dotnet build .\TTT\TTT.csproj -c Debug -p:Platform=x64
 dotnet run --project .\TTT\TTT.csproj
 ```
 
-Se quiser forçar a plataforma x64 no build:
+## Publishing
 
-```powershell
-dotnet build .\TTT\TTT.csproj -c Debug -p:Platform=x64
-```
-
-## Publicação
-
-Para publicar a aplicação self-contained para Windows x64:
+To publish the app as a self-contained Windows x64 binary:
 
 ```powershell
 dotnet publish .\TTT\TTT.csproj -c Release -f net8.0-windows -r win-x64 --self-contained true -p:Platform=x64
 ```
 
-Saída esperada:
+Output:
 
 ```text
 TTT\bin\x64\Release\net8.0-windows\win-x64\publish
 ```
 
-## Gerar instalador e release
+## Generating the Installer & Release
 
-O fluxo foi consolidado em um único script: `release.ps1`.
+The full flow is handled by a single script: `release.ps1`.
 
-Ele executa:
+Steps it performs:
 
-1. Atualização de versão no projeto e no `installer.iss`.
-2. Preparação do `CHANGELOG.md`.
-3. `dotnet build` em Release.
-4. `dotnet publish` self-contained para `win-x64`.
-5. Compilação do instalador com `ISCC.exe`.
-6. Publicação da GitHub Release com o instalador anexado.
+1. Bumps the version in the `.csproj` and `installer.iss`.
+2. Prepares the corresponding section in `CHANGELOG.md`.
+3. Runs `dotnet build` in Release.
+4. Runs `dotnet publish` self-contained for `win-x64`.
+5. Compiles the installer with `ISCC.exe`.
+6. Publishes a GitHub Release with the installer attached.
 
-Exemplo:
+Example:
 
 ```powershell
 .\release.ps1 -Version 2.0.1
 ```
 
-Para gerar tudo sem publicar no GitHub:
+To build everything without publishing to GitHub:
 
 ```powershell
 .\release.ps1 -Version 2.0.1 -SkipGitHubRelease
 ```
 
-Artefatos gerados:
+Generated artifacts:
 
-- Publicação: `TTT\bin\x64\Release\net8.0-windows\win-x64\publish`
-- Instalador: `installer_output\TTT_Setup_2.0.0.exe` ou nome equivalente com a versão atual
+- Publish: `TTT\bin\x64\Release\net8.0-windows\win-x64\publish`
+- Installer: `installer_output\TTT_Setup_<version>.exe`
 
-## Auto update
+## Auto-Update
 
-O app verifica automaticamente a release mais recente do repositório no GitHub ao abrir a janela principal.
+The app automatically checks for the latest release on GitHub when the main window opens.
 
-Fluxo atual:
+Flow:
 
-1. Consulta `releases/latest` da API do GitHub.
-2. Compara a tag publicada com a versão embarcada no executável.
-3. Quando encontra versão mais nova, mostra um botão na barra superior.
-4. Ao confirmar, baixa o instalador `.exe` da release.
-5. Executa instalação silenciosa e reinicia o app.
+1. Queries `releases/latest` from the GitHub API.
+2. Compares the published tag with the version embedded in the executable.
+3. When a newer version is found, shows a button in the top bar.
+4. On confirmation, downloads the `.exe` installer from the release.
+5. Runs silent installation and restarts the app.
 
-Para esse fluxo funcionar em produção, a release do GitHub precisa conter o instalador gerado pelo projeto.
+> For this to work in production, the GitHub release must include the installer generated by `release.ps1`.
 
-## Release
+## Runtime Files
 
-Foi adicionado um script `release.ps1` inspirado no fluxo do DaTT. Ele:
+When running the app, auxiliary files may be created next to the executable:
 
-1. Atualiza a versão no `.csproj` e no `installer.iss`.
-2. Prepara a seção correspondente no `CHANGELOG.md`.
-3. Compila o app.
-4. Gera o instalador.
-5. Cria um commit de release e envia para `origin`.
-6. Publica a release no GitHub com o instalador anexado, via `gh` CLI.
+| File/Folder        | Purpose                             |
+| ------------------ | ----------------------------------- |
+| `appsettings.json` | App state (e.g. last loaded config) |
+| `logs.txt`         | Application log                     |
+| `configs\`         | Saved session configurations        |
+| `exports\`         | Exported files                      |
+| `pointer-scans\`   | Pointer chain snapshots             |
 
-O script faz o commit do estado atual do repositório durante o fluxo de release.
+## Usage Flow
 
-Exemplo:
+1. Open the **Process** tab and attach to the target.
+2. Go to the **Scanner** and run the first scan.
+3. Refine results with `Next Scan`.
+4. Send relevant addresses to the **Address List**.
+5. Edit, freeze, or group entries.
+6. Use the **Pointer Mapper** to locate persistent chains.
+7. Save the configuration to reuse the session later.
 
-```powershell
-.\release.ps1 -Version 2.0.1
-```
+## Limitations
 
-## Arquivos gerados em runtime
+- Windows-only — depends on native Windows APIs.
+- The target process must be accessible to the current user or run with compatible permissions.
+- Pointer chain stability depends on the memory layout of the analyzed process.
+- Modifying memory of third-party processes may cause undefined behavior in the target.
 
-Ao executar a aplicação, arquivos e diretórios auxiliares podem ser criados ao lado do executável:
+## License
 
-- `appsettings.json`: estado simples da aplicação, como último arquivo de configuração.
-- `logs.txt`: log do aplicativo.
-- `configs\`: configurações salvas da sessão.
-- `exports\`: arquivos exportados.
-- `pointer-scans\`: snapshots de cadeias de ponteiro.
-
-## Fluxo de uso
-
-1. Abra a aba de processos e anexe ao alvo.
-2. Vá para o scanner e execute o primeiro scan.
-3. Refine os resultados com `Next Scan`.
-4. Envie endereços relevantes para a address list.
-5. Edite, congele ou agrupe entradas.
-6. Use o pointer mapper para localizar cadeias persistentes.
-7. Salve a configuração para reaproveitar a sessão depois.
-
-## Limitações e cuidados
-
-- O aplicativo é Windows-only por depender de APIs nativas do sistema.
-- O processo alvo precisa ser acessível ao usuário atual ou executado com permissões compatíveis.
-- A estabilidade de pointer chains depende do layout de memória do processo analisado.
-- Alterações de memória em processos terceiros podem causar comportamento indefinido no alvo.
-
-## Solução e projeto principal
-
-- Solução: `TTT.Migration.sln`
-- Projeto desktop: `TTT\TTT.csproj`
+See [LICENSE](LICENSE).
