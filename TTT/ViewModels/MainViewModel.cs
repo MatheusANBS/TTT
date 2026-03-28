@@ -25,11 +25,17 @@ public sealed partial class MainViewModel : BaseViewModel
     public AddressListViewModel AddressListVm { get; }
     public PointerMapperViewModel PointerMapperVm { get; }
     public LogViewModel LogVm { get; }
+    public GitHubRelease? PendingRelease { get; private set; }
+
+    private readonly TaskCompletionSource _appReadyTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     [ObservableProperty] private object _currentView;
     [NotifyCanExecuteChangedFor(nameof(DisconnectProcessCommand))]
     [ObservableProperty] private bool _isAttached;
     [ObservableProperty] private string _attachedLabel = "Desconectado";
+    [ObservableProperty] private bool _updateAvailable;
+    [ObservableProperty] private string _updateTooltip = string.Empty;
+    [ObservableProperty] private string _updateVersionText = string.Empty;
 
     public MainViewModel(
         MemoryService memory,
@@ -58,6 +64,12 @@ public sealed partial class MainViewModel : BaseViewModel
         LogVm = new LogViewModel { SnackbarCallback = snack };
 
         _currentView = ProcessVm;
+    }
+
+    public void NotifyAppReady()
+    {
+        _appReadyTcs.TrySetResult();
+        _ = CheckForUpdateAsync();
     }
 
     private void HandleProcessAttached(string processName, bool attached)
@@ -108,6 +120,32 @@ public sealed partial class MainViewModel : BaseViewModel
 
         var dialog = new HotkeysTutorialWindow();
         dialog.ShowDialog(desktop.MainWindow!);
+    }
+
+    [RelayCommand]
+    private async Task CheckForUpdateAsync()
+    {
+        await _appReadyTcs.Task;
+
+        try
+        {
+            var release = await UpdateService.CheckForUpdateAsync();
+            if (release is null)
+                return;
+
+            PendingRelease = release;
+            var newVersion = release.TagName.TrimStart('v', 'V');
+            UpdateVersionText = $"v{newVersion}";
+            UpdateTooltip = $"Nova versao {newVersion} disponivel. Clique para atualizar.";
+            UpdateAvailable = true;
+
+            LogService.Instance.Info($"Update available: {UpdateService.CurrentVersionString} -> {newVersion}");
+            ShowSnackbar($"Nova versao disponivel: v{newVersion}");
+        }
+        catch (Exception ex)
+        {
+            LogService.Instance.Warn($"Update UI flow failed: {ex.Message}");
+        }
     }
 
     [RelayCommand]

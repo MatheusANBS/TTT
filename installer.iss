@@ -1,5 +1,5 @@
-#define AppName      "TTT"
-#define AppVersion   "2.0.0"
+﻿#define AppName      "TTT"
+#define AppVersion   "2.0.2"
 #define AppPublisher "Kry"
 #define AppExeName   "TTT.exe"
 #define SourceDir    "TTT\bin\x64\Release\net8.0-windows\win-x64\publish"

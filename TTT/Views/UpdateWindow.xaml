@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="TTT.Views.UpdateWindow"
+        Title="Atualizacao disponivel"
+        Width="500" Height="380"
+        MinWidth="460" MinHeight="340"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        ExtendClientAreaToDecorationsHint="False"
+        Background="#182127">
+
+    <Border Padding="28">
+        <Grid RowDefinitions="Auto,Auto,*,Auto,Auto">
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                <TextBlock Text="↓" FontSize="28" Margin="0,0,14,0" Foreground="#6BCB77" VerticalAlignment="Center"/>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Nova versao disponivel" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock x:Name="VersionText" FontSize="12" Opacity="0.7" Margin="0,2,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <TextBlock Grid.Row="1" Text="Notas da release" FontSize="13" FontWeight="SemiBold" Opacity="0.75" Margin="0,0,0,6"/>
+
+            <Border Grid.Row="2" Background="#10181D" CornerRadius="8" Padding="14" Margin="0,0,0,16" BorderBrush="#2C3942" BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="ChangelogText" TextWrapping="Wrap" FontSize="12" Opacity="0.9" LineHeight="20"/>
+                </ScrollViewer>
+            </Border>
+
+            <StackPanel Grid.Row="3" x:Name="ProgressPanel" IsVisible="False" Margin="0,0,0,16">
+                <Grid Margin="0,0,0,6">
+                    <TextBlock x:Name="ProgressStatusText" Text="Baixando..." FontSize="12" Opacity="0.7"/>
+                    <TextBlock x:Name="ProgressPercentText" Text="0%" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right" Opacity="0.7"/>
+                </Grid>
+                <ProgressBar x:Name="DownloadProgress" Height="6" Minimum="0" Maximum="100" Value="0" Foreground="#6BCB77"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button x:Name="CancelButton" Content="Depois" Click="Cancel_Click" Padding="24,8" MinWidth="100"/>
+                <Button x:Name="UpdateButton" Content="Atualizar e reiniciar" Click="Update_Click" Padding="24,8" MinWidth="170" Background="#6BCB77" Foreground="Black"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

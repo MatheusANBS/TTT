@@ -15,6 +15,7 @@ O aplicativo atual usa Avalonia UI sobre .NET 8 e roda apenas em Windows x64.
 - Configurar hotkeys globais por grupo.
 - Encontrar pointer chains para um endereço alvo.
 - Salvar e carregar configuração da sessão.
+- Detectar automaticamente novas versões publicadas no GitHub Releases.
 - Exportar dados auxiliares para arquivos locais.
 - Gerar instalador Windows com Inno Setup.
 
@@ -49,7 +50,7 @@ TTT/                        Aplicação desktop
   ViewModels/               Orquestração MVVM
   Views/                    Telas Avalonia
   Models/                   Modelos de dados
-build-installer.ps1         Publicação e geração do instalador
+release.ps1                 Versionamento, publicação, instalador e GitHub Release
 installer.iss               Script do Inno Setup
 ```
 
@@ -77,8 +78,8 @@ installer.iss               Script do Inno Setup
 Na raiz do repositório:
 
 ```powershell
-dotnet restore .\TTT.Migration.sln
-dotnet build .\TTT.Migration.sln -c Debug
+dotnet restore .\TTT\TTT.csproj
+dotnet build .\TTT\TTT.csproj -c Debug -p:Platform=x64
 dotnet run --project .\TTT\TTT.csproj
 ```
 
@@ -102,29 +103,68 @@ Saída esperada:
 TTT\bin\x64\Release\net8.0-windows\win-x64\publish
 ```
 
-## Gerar instalador
+## Gerar instalador e release
 
-O script `build-installer.ps1` executa dois passos:
+O fluxo foi consolidado em um único script: `release.ps1`.
 
-1. Publica o app em modo Release self-contained.
-2. Compila o instalador via `ISCC.exe`.
+Ele executa:
 
-Execução padrão:
+1. Atualização de versão no projeto e no `installer.iss`.
+2. Preparação do `CHANGELOG.md`.
+3. `dotnet build` em Release.
+4. `dotnet publish` self-contained para `win-x64`.
+5. Compilação do instalador com `ISCC.exe`.
+6. Publicação da GitHub Release com o instalador anexado.
+
+Exemplo:
 
 ```powershell
-.\build-installer.ps1
+.\release.ps1 -Version 2.0.1
 ```
 
-Exemplo informando manualmente o caminho do Inno Setup:
+Para gerar tudo sem publicar no GitHub:
 
 ```powershell
-.\build-installer.ps1 -IsccPath "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+.\release.ps1 -Version 2.0.1 -SkipGitHubRelease
 ```
 
 Artefatos gerados:
 
 - Publicação: `TTT\bin\x64\Release\net8.0-windows\win-x64\publish`
 - Instalador: `installer_output\TTT_Setup_2.0.0.exe` ou nome equivalente com a versão atual
+
+## Auto update
+
+O app verifica automaticamente a release mais recente do repositório no GitHub ao abrir a janela principal.
+
+Fluxo atual:
+
+1. Consulta `releases/latest` da API do GitHub.
+2. Compara a tag publicada com a versão embarcada no executável.
+3. Quando encontra versão mais nova, mostra um botão na barra superior.
+4. Ao confirmar, baixa o instalador `.exe` da release.
+5. Executa instalação silenciosa e reinicia o app.
+
+Para esse fluxo funcionar em produção, a release do GitHub precisa conter o instalador gerado pelo projeto.
+
+## Release
+
+Foi adicionado um script `release.ps1` inspirado no fluxo do DaTT. Ele:
+
+1. Atualiza a versão no `.csproj` e no `installer.iss`.
+2. Prepara a seção correspondente no `CHANGELOG.md`.
+3. Compila o app.
+4. Gera o instalador.
+5. Cria um commit de release e envia para `origin`.
+6. Publica a release no GitHub com o instalador anexado, via `gh` CLI.
+
+O script faz o commit do estado atual do repositório durante o fluxo de release.
+
+Exemplo:
+
+```powershell
+.\release.ps1 -Version 2.0.1
+```
 
 ## Arquivos gerados em runtime
 
