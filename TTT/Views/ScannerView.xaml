@@ -46,10 +46,21 @@
                               SelectedItem="{Binding ScanType}"
                               Margin="0,0,0,12"/>
 
-                    <!-- Value input (only for ExactValue) -->
-                    <TextBox Watermark="Valor"
+                        <!-- Value input -->
+                        <TextBox Watermark="Valor"
                              Text="{Binding ValueText}"
+                             IsVisible="{Binding IsSingleValueInputVisible}"
                              Margin="0,0,0,16"/>
+
+                        <!-- BetweenValue input -->
+                        <StackPanel IsVisible="{Binding IsRangeInputVisible}"
+                            Margin="0,0,0,16"
+                            Spacing="6">
+                        <TextBox Watermark="Valor mínimo"
+                             Text="{Binding RangeMinText}"/>
+                        <TextBox Watermark="Valor máximo"
+                             Text="{Binding RangeMaxText}"/>
+                        </StackPanel>
 
                     <!-- Action buttons -->
                         <Button Command="{Binding FirstScanCommand}"

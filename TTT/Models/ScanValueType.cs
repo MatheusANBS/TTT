@@ -30,6 +30,8 @@ public enum ScanType
 {
     /// <summary>Find all locations with exactly the supplied value.</summary>
     ExactValue,
+    /// <summary>Find values inside an inclusive min/max numeric range.</summary>
+    BetweenValue,
     /// <summary>First scan that records all values for subsequent comparison.</summary>
     UnknownInitialValue,
     /// <summary>Values greater than the previous scan snapshot.</summary>
@@ -41,4 +43,3 @@ public enum ScanType
     /// <summary>Values identical to the previous snapshot.</summary>
     UnchangedValue
 }
-

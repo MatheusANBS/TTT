@@ -1,6 +1,7 @@
 // File: Services/ScannerService.cs
 
 using System.Collections.Concurrent;
+using System.Globalization;
 using TTT.Models;
 using TTT.Utils;
 
@@ -56,13 +57,25 @@ public sealed class ScannerService(MemoryService memory)
         CancellationToken ct = default)
     {
         byte[]? target = scanType == ScanType.ExactValue ? searchValue.ToBytes(valueType) : null;
+        double rangeMin = 0;
+        double rangeMax = 0;
+
+        if (scanType == ScanType.BetweenValue)
+        {
+            if (valueType == ScanValueType.String)
+                throw new ArgumentException("'BetweenValue' não suporta tipo String.");
+
+            if (!TryParseBetweenSearchValue(searchValue, valueType, out rangeMin, out rangeMax))
+                throw new ArgumentException("Formato inválido para 'BetweenValue'. Use mínimo e máximo válidos.");
+        }
+
         int valueSize = valueType.ByteSize();
         if (valueSize == 0 && valueType == ScanValueType.String)
             valueSize = target?.Length ?? 2;
 
         // Alignment: numeric types are virtually always naturally aligned in memory.
         // Strings and unknown scans scan byte-by-byte.
-        int stride = (scanType == ScanType.ExactValue && valueType != ScanValueType.String)
+        int stride = ((scanType == ScanType.ExactValue || scanType == ScanType.BetweenValue) && valueType != ScanValueType.String)
             ? valueSize
             : 1;
 
@@ -135,6 +148,19 @@ public sealed class ScannerService(MemoryService memory)
                                      chunkSpan.Slice(i, target.Length).SequenceEqual(target))
                             {
                                 var raw = chunkSpan.Slice(i, target.Length).ToArray();
+                                localResults.Add(new MemoryScanResult
+                                {
+                                    Address      = regionBase + offset + i,
+                                    RawBytes     = raw,
+                                    DisplayValue = raw.ReadValueAs(valueType),
+                                    Type         = valueType
+                                });
+                            }
+                            else if (scanType == ScanType.BetweenValue &&
+                                     TryReadNumericValue(chunkSpan.Slice(i, searchSize), valueType, out var currentValue) &&
+                                     currentValue >= rangeMin && currentValue <= rangeMax)
+                            {
+                                var raw = chunkSpan.Slice(i, searchSize).ToArray();
                                 localResults.Add(new MemoryScanResult
                                 {
                                     Address      = regionBase + offset + i,
@@ -221,6 +247,17 @@ public sealed class ScannerService(MemoryService memory)
         byte[]? target = scanType == ScanType.ExactValue
             ? searchValue.ToBytes(previous[0].Type)
             : null;
+        double rangeMin = 0;
+        double rangeMax = 0;
+
+        if (scanType == ScanType.BetweenValue)
+        {
+            if (previous[0].Type == ScanValueType.String)
+                throw new ArgumentException("'BetweenValue' não suporta tipo String.");
+
+            if (!TryParseBetweenSearchValue(searchValue, previous[0].Type, out rangeMin, out rangeMax))
+                throw new ArgumentException("Formato inválido para 'BetweenValue'. Use mínimo e máximo válidos.");
+        }
 
         var filteredBag = new ConcurrentBag<List<MemoryScanResult>>();
         long processed = 0;
@@ -267,6 +304,8 @@ public sealed class ScannerService(MemoryService memory)
                         bool match = scanType switch
                         {
                             ScanType.ExactValue          => target is not null && current.AsSpan().SequenceEqual(target),
+                            ScanType.BetweenValue        => TryReadNumericValue(current, prev.Type, out var currentValue) &&
+                                                            currentValue >= rangeMin && currentValue <= rangeMax,
                             ScanType.UnknownInitialValue => true,
                             ScanType.ChangedValue        => !current.AsSpan().SequenceEqual(prev.RawBytes),
                             ScanType.UnchangedValue      => current.AsSpan().SequenceEqual(prev.RawBytes),
@@ -447,6 +486,119 @@ public sealed class ScannerService(MemoryService memory)
         public long StartAddress;
         public long EndAddress;
         public readonly List<MemoryScanResult> Results = [];
+    }
+
+    private static bool TryParseBetweenSearchValue(
+        string searchValue,
+        ScanValueType valueType,
+        out double min,
+        out double max)
+    {
+        min = 0;
+        max = 0;
+
+        if (string.IsNullOrWhiteSpace(searchValue))
+            return false;
+
+        var parts = searchValue.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2)
+            return false;
+
+        if (!TryParseNumericValue(parts[0], valueType, out min) ||
+            !TryParseNumericValue(parts[1], valueType, out max))
+            return false;
+
+        if (min > max)
+            (min, max) = (max, min);
+
+        return true;
+    }
+
+    private static bool TryParseNumericValue(string input, ScanValueType valueType, out double value)
+    {
+        value = 0;
+
+        switch (valueType)
+        {
+            case ScanValueType.Byte1:
+                if (byte.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out var byte1) ||
+                    byte.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out byte1))
+                {
+                    value = byte1;
+                    return true;
+                }
+                return false;
+
+            case ScanValueType.Byte2:
+                if (short.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out var byte2) ||
+                    short.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out byte2))
+                {
+                    value = byte2;
+                    return true;
+                }
+                return false;
+
+            case ScanValueType.Byte4:
+                if (int.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out var byte4) ||
+                    int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out byte4))
+                {
+                    value = byte4;
+                    return true;
+                }
+                return false;
+
+            case ScanValueType.Byte8:
+                if (long.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out var byte8) ||
+                    long.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out byte8))
+                {
+                    value = byte8;
+                    return true;
+                }
+                return false;
+
+            case ScanValueType.Float:
+            case ScanValueType.Double:
+                return double.TryParse(input, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out value) ||
+                       double.TryParse(input, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out value);
+
+            default:
+                return false;
+        }
+    }
+
+    private static bool TryReadNumericValue(ReadOnlySpan<byte> raw, ScanValueType valueType, out double value)
+    {
+        value = 0;
+
+        switch (valueType)
+        {
+            case ScanValueType.Byte1 when raw.Length >= 1:
+                value = raw[0];
+                return true;
+
+            case ScanValueType.Byte2 when raw.Length >= 2:
+                value = BitConverter.ToInt16(raw);
+                return true;
+
+            case ScanValueType.Byte4 when raw.Length >= 4:
+                value = BitConverter.ToInt32(raw);
+                return true;
+
+            case ScanValueType.Byte8 when raw.Length >= 8:
+                value = BitConverter.ToInt64(raw);
+                return true;
+
+            case ScanValueType.Float when raw.Length >= 4:
+                value = BitConverter.ToSingle(raw);
+                return true;
+
+            case ScanValueType.Double when raw.Length >= 8:
+                value = BitConverter.ToDouble(raw);
+                return true;
+
+            default:
+                return false;
+        }
     }
 
     private static void ReportProgress(

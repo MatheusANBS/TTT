@@ -26,6 +26,8 @@ public sealed partial class ScannerViewModel : BaseViewModel
     [ObservableProperty] private ScanValueType _valueType  = ScanValueType.Byte4;
     [ObservableProperty] private ScanType      _scanType   = ScanType.ExactValue;
     [ObservableProperty] private string        _valueText  = string.Empty;
+    [ObservableProperty] private string        _rangeMinText = string.Empty;
+    [ObservableProperty] private string        _rangeMaxText = string.Empty;
     [ObservableProperty] private string        _resultValueFilter = string.Empty;
     [ObservableProperty] private int           _currentPage = 1;
     [ObservableProperty] private int           _pageSize    = 100;
@@ -79,6 +81,14 @@ public sealed partial class ScannerViewModel : BaseViewModel
     public string PageInfoText => $"Página {CurrentPage} de {TotalPages}";
     public bool HasPreviousPage => CurrentPage > 1;
     public bool HasNextPage => CurrentPage < TotalPages;
+    public bool IsSingleValueInputVisible => ScanType != ScanType.BetweenValue;
+    public bool IsRangeInputVisible => ScanType == ScanType.BetweenValue;
+
+    partial void OnScanTypeChanged(ScanType value)
+    {
+        OnPropertyChanged(nameof(IsSingleValueInputVisible));
+        OnPropertyChanged(nameof(IsRangeInputVisible));
+    }
 
     partial void OnResultValueFilterChanged(string value)
     {
@@ -120,6 +130,8 @@ public sealed partial class ScannerViewModel : BaseViewModel
     {
         await SafeRunAsync(async () =>
         {
+            var searchValue = BuildSearchValue();
+
             IsScanning = true;
             using var cts = new CancellationTokenSource();
             _cts = cts;
@@ -137,7 +149,7 @@ public sealed partial class ScannerViewModel : BaseViewModel
                 });
             });
 
-            await _scanner.FirstScanAsync(ValueText, ValueType, ScanType, progress, cts.Token);
+            await _scanner.FirstScanAsync(searchValue, ValueType, ScanType, progress, cts.Token);
             await RefreshResultsAsync();
             HasPreviousScan = _scanner.HasPreviousScan;
         });
@@ -154,6 +166,8 @@ public sealed partial class ScannerViewModel : BaseViewModel
     {
         await SafeRunAsync(async () =>
         {
+            var searchValue = BuildSearchValue();
+
             IsScanning = true;
             using var cts = new CancellationTokenSource();
             _cts = cts;
@@ -171,7 +185,7 @@ public sealed partial class ScannerViewModel : BaseViewModel
                 });
             });
 
-            await _scanner.NextScanAsync(ValueText, ScanType, progress, cts.Token);
+            await _scanner.NextScanAsync(searchValue, ScanType, progress, cts.Token);
             await RefreshResultsAsync();
         });
         IsScanning      = false;
@@ -354,5 +368,19 @@ public sealed partial class ScannerViewModel : BaseViewModel
             return true;
 
         return result.DisplayValue.Contains(ResultValueFilter.Trim(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string BuildSearchValue()
+    {
+        if (ScanType != ScanType.BetweenValue)
+            return ValueText;
+
+        if (ValueType == ScanValueType.String)
+            throw new ArgumentException("'BetweenValue' não suporta tipo String.");
+
+        if (string.IsNullOrWhiteSpace(RangeMinText) || string.IsNullOrWhiteSpace(RangeMaxText))
+            throw new ArgumentException("Informe valor mínimo e máximo para o scan 'BetweenValue'.");
+
+        return $"{RangeMinText.Trim()};{RangeMaxText.Trim()}";
     }
 }
